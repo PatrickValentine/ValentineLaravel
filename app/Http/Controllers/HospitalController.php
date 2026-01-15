@@ -19,7 +19,7 @@ class HospitalController extends Controller
     public function __construct()
     {
         $filePath = storage_path('app/pause_dates.json');
-        
+
         if (!file_exists($filePath)) {
             // Create file if missing
             $this->pauseData = [
@@ -95,15 +95,15 @@ class HospitalController extends Controller
 
         if($isHospitalPaused){
             $hospital->full_greeting = ($hospital->how_to_address ? $hospital->how_to_address : "Friend") . ", thank you for registering to participate in Valentines By Kids! Because your request came in after January 5, we will only be able to satisfy your request if we receive enough Valentines from the children. Our database now reflects:";
-            $success = "Success! You have registered. 
-                        We hope we will have enough cards to satisfy your request this coming Valentine’s Day. 
-                        Your information appears below. 
+            $success = "Success! You have registered.
+                        We hope we will have enough cards to satisfy your request this coming Valentine’s Day.
+                        Your information appears below.
                         Feel free to correct anything, but remember to click “Submit” again at the end.";
         }
         else{
             $hospital->full_greeting = ($hospital->how_to_address ? $hospital->how_to_address : "Friend") . ", thank you for registering to participate in Valentines By Kids! Our database now reflects:";
-            $success = 'Success! You have registered and you will receive your delivery before Valentine’s Day. 
-                        Your information appears below. 
+            $success = 'Success! You have registered and you will receive your delivery before Valentine’s Day.
+                        Your information appears below.
                         Feel free to correct anything, but remember to click “Submit” again at the end.';
         }
 
@@ -118,6 +118,11 @@ class HospitalController extends Controller
         );
 
         Mail::to($hospital->email)->send(new SendEmail($data));
+
+        $hospital = Hospital::find($hospital->id);
+        $hospital->update_status = true;
+        $hospital->timestamps = false;
+        $hospital->save();
 
         return redirect()->route('hospital.edit', $hospital->token)
         // return redirect()
@@ -176,7 +181,7 @@ class HospitalController extends Controller
         $allData = array_merge($request->all(), $validated);
 
         $hospital->update($allData);
-        
+
         // $hospital->prefilled_link = url('/hospital/' . $hospital->id . '/edit');
         $hospital->save();
 
@@ -189,12 +194,12 @@ class HospitalController extends Controller
 
         if($isHospitalPaused){
             $hospital->full_greeting = ($hospital->how_to_address ? $hospital->how_to_address : "Friend") . ", thank you for updating your information.";
-            $success = "Success! You have updated your information. 
+            $success = "Success! You have updated your information.
                         Feel free to correct anything below, but remember to click “Submit” again at the end.";
         }
         else{
             $hospital->full_greeting = ($hospital->how_to_address ? $hospital->how_to_address : "Friend") . ", thank you for updating your information.";
-            $success = 'Success! You have updated your information. 
+            $success = 'Success! You have updated your information.
                         Feel free to correct anything, but remember to click “Submit” again at the end.';
         }
 
@@ -210,7 +215,7 @@ class HospitalController extends Controller
         );
 
         Mail::to($hospital->email)->send(new SendEmail($data));
-        
+
         return redirect()
             ->back()
             ->with('success', $success);

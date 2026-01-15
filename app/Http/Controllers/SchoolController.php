@@ -19,7 +19,7 @@ class SchoolController extends Controller
     public function __construct()
     {
         $filePath = storage_path('app/pause_dates.json');
-        
+
         if (!file_exists($filePath)) {
             // Create file if missing
             $this->pauseData = [
@@ -98,8 +98,8 @@ class SchoolController extends Controller
         }
         else{
             $school->full_greeting = ($school->how_to_address ? $school->how_to_address : "Friend") . ", thank you for registering to participate in Valentines By Kids! Our database now reflects:";
-            $success = 'Success! You have completed the registration process. 
-                        We will contact you when we are about to send you the envelopes. 
+            $success = 'Success! You have completed the registration process.
+                        We will contact you when we are about to send you the envelopes.
                         Feel free to correct anything below, but remember to click “Submit” again at the end.';
         }
 
@@ -114,6 +114,11 @@ class SchoolController extends Controller
         );
 
         Mail::to($school->email)->send(new SendEmail($data));
+
+        $school = School::find($school->id);
+        $school->update_status = true;
+        $school->timestamps = false;
+        $school->save();
 
         return redirect()->route('school.edit', $school->token)
         // return redirect()
@@ -168,7 +173,7 @@ class SchoolController extends Controller
                 'email.unique' => 'The email has already been taken. You can use a different address or email us at Patrick@ValentinesByKids.org to ask us to either delete the old record or to send you a link to update your information.',
             ]);
         }
-        
+
         // Merge the full form data (request->all) with validated data
         $allData = array_merge($request->all(), $validated);
 
@@ -185,15 +190,15 @@ class SchoolController extends Controller
 
         if($isSchoolPaused){
             $school->full_greeting = ($school->how_to_address ? $school->how_to_address : "Friend") . ", thank you for updating your information.";
-            $success = "Success! You have updated your information. 
+            $success = "Success! You have updated your information.
                         Feel free to correct anything, but remember to click “Submit” again at the end.";
         }
         else{
             $school->full_greeting = ($school->how_to_address ? $school->how_to_address : "Friend") . ", thank you for updating your information.";
-            $success = 'Success! You have updated your information. 
+            $success = 'Success! You have updated your information.
                         Feel free to correct anything, but remember to click “Submit” again at the end.';
         }
-        
+
         $subject = 'Valentine notification';
         $message = $school;
 
@@ -205,7 +210,7 @@ class SchoolController extends Controller
         );
 
         Mail::to($school->email)->send(new SendEmail($data));
-        
+
         return redirect()
             ->back()
             ->with('success', $success);
