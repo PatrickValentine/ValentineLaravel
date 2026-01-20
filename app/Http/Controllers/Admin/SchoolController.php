@@ -60,6 +60,7 @@ class SchoolController extends Controller
             'city'                  => ['required', 'max:35', 'regex:/^[A-Za-z0-9 .-]+$/'],
             'state'                 => ['required', 'size:2', 'alpha'],
             'zip'                   => 'required|string|max:20',
+            'service_type'          => 'required|string',
             'phone'                 => ['required', 'digits:10'],
             'standing_order'        => 'boolean',
         ]);
@@ -103,6 +104,7 @@ class SchoolController extends Controller
             'city'                 => ['required', 'max:35', 'regex:/^[A-Za-z0-9 .-]+$/'],
             'state'                => ['required', 'size:2', 'alpha'],
             'zip'                  => 'required|string|max:20',
+            'service_type'         => 'required|string',
             'phone'                => ['required', 'digits:10'],
             'standing_order'       => 'boolean',
             'updated_at'           => 'nullable|date',
