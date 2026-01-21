@@ -16,7 +16,7 @@ class SchoolReportController extends Controller
     {
         // Loads the same Blade you’re already on OR a separate /reports page.
         // If you prefer keeping it on the current page, just add the modal there (see Blade below).
-        return view('admin.schools.reports'); 
+        return view('admin.schools.reports');
     }
 
     private function baseQuery(Request $request)
@@ -63,11 +63,11 @@ class SchoolReportController extends Controller
                     'schools.id','schools.organization_name','schools.contact_person_name','schools.how_to_address',
                     'schools.email','schools.phone','schools.street','schools.city','schools.county','schools.state','schools.zip',
                     'schools.envelope_quantity','schools.instructions_cards','schools.prefilled_link','schools.standing_order','schools.update_status','schools.updated_at',
-                    'schools.public_notes','schools.internal_notes','schools.contact_title',
+                    'schools.public_notes','schools.internal_notes','schools.contact_title', 'schools.qty_received_last_year', 'schools.county',
                     'sb.box_style','sb.length','sb.width','sb.height','sb.empty_weight','sb.full_weight',
-                    'v.name as volunteer_name','v.phone as volunteer_phone',                    
-                    DB::raw('CONCAT("S", schools.state, LPAD(schools.id, 5, "0")) as reference'), 
-                    DB::raw('CONCAT(schools.envelope_quantity, "/", schools.instructions_cards, "/", sb.box_style) as invoiceNumber'), 
+                    'v.name as volunteer_name','v.phone as volunteer_phone',
+                    DB::raw('CONCAT("S", schools.state, LPAD(schools.id, 5, "0")) as reference'),
+                    DB::raw('CONCAT(schools.envelope_quantity, "/", schools.instructions_cards, "/", sb.box_style) as invoiceNumber'),
                 ])
                 ->get();
 
@@ -75,7 +75,7 @@ class SchoolReportController extends Controller
         } catch (\Throwable $e) {
             logger()->error($e);
             return response()->json(['error' => $e->getMessage()], 500);
-        }        
+        }
     }
 
     // Exports share filters via query string (?state=CA&min_envelopes=100...)
@@ -87,11 +87,11 @@ class SchoolReportController extends Controller
                 'schools.id','schools.organization_name','schools.contact_person_name','schools.how_to_address',
                 'schools.email','schools.phone','schools.street','schools.city','schools.county','schools.state','schools.zip',
                 'schools.envelope_quantity','schools.instructions_cards','schools.prefilled_link','schools.standing_order','schools.update_status','schools.updated_at',
-                'schools.public_notes','schools.internal_notes','schools.contact_title',
+                'schools.public_notes','schools.internal_notes','schools.contact_title', 'schools.qty_received_last_year',
                 'sb.box_style','sb.length','sb.width','sb.height','sb.empty_weight','sb.full_weight',
-                'v.name as volunteer_name','v.phone as volunteer_phone',                    
-                DB::raw('CONCAT("S", schools.state, LPAD(schools.id, 5, "0")) as reference'), 
-                DB::raw('CONCAT(schools.envelope_quantity, "/", schools.instructions_cards, "/", sb.box_style) as invoiceNumber'), 
+                'v.name as volunteer_name','v.phone as volunteer_phone',
+                DB::raw('CONCAT("S", schools.state, LPAD(schools.id, 5, "0")) as reference'),
+                DB::raw('CONCAT(schools.envelope_quantity, "/", schools.instructions_cards, "/", sb.box_style) as invoiceNumber'),
             ])
             ->get();
 
@@ -116,6 +116,7 @@ class SchoolReportController extends Controller
                         $r->street, $r->city, $r->county, $r->state, $r->zip,
                         $r->envelope_quantity,
                         $r->instructions_cards,
+                        $r->qty_received_last_year,
                         $r->box_style,
                         "{$r->length}x{$r->width}x{$r->height}",
                         $r->empty_weight,
@@ -127,7 +128,7 @@ class SchoolReportController extends Controller
                         $r->standing_order ? 'Yes' : 'No',
                         $r->update_status ? 'Update' : 'New',
                         $r->updated_at->format('Ymd')
-                        // $r->prefilled_link,                        
+                        // $r->prefilled_link,
                         // $r->update_status ? 'Updated' : '—',
                     ];
                 })->toArray();
@@ -136,7 +137,7 @@ class SchoolReportController extends Controller
                 return [
                     'ID','Organization','Contact','Email','Dear Whom','Phone',
                     'Street','City','County','State','ZIP',
-                    'Envelopes','Cards','Box Style','Dimensions','Empty Weight','Full Weight',
+                    'Envelopes','Cards', 'Qty returned (by year)','Box Style','Dimensions','Empty Weight','Full Weight',
                     'Volunteer','Prefilled Link','Notes from School','Internal Notes','Standing Order','New/Update','Last Updated'
                 ];
             }
@@ -163,8 +164,8 @@ class SchoolReportController extends Controller
             'schools.envelope_quantity','schools.instructions_cards','schools.prefilled_link','schools.standing_order','schools.update_status','schools.updated_at',
             'schools.public_notes','schools.internal_notes','schools.contact_title',
             'sb.box_style','sb.length','sb.width','sb.height','sb.empty_weight','sb.full_weight',
-            DB::raw('CONCAT("S", schools.state, LPAD(schools.id, 5, "0")) as reference'), 
-            DB::raw('CONCAT(schools.envelope_quantity, "/", schools.instructions_cards, "/", sb.box_style) as invoiceNumber'), 
+            DB::raw('CONCAT("S", schools.state, LPAD(schools.id, 5, "0")) as reference'),
+            DB::raw('CONCAT(schools.envelope_quantity, "/", schools.instructions_cards, "/", sb.box_style) as invoiceNumber'),
         ])->get();;
 
         $client = new \Google\Client();
@@ -205,7 +206,7 @@ class SchoolReportController extends Controller
                 $r->standing_order ? 'Yes' : 'No',
                 $r->update_status ? 'Update' : 'New',
                 $r->updated_at->format('Ymd')
-                // $r->prefilled_link,                
+                // $r->prefilled_link,
                 // $r->update_status ? 'Updated' : '—',
             ];
         }
