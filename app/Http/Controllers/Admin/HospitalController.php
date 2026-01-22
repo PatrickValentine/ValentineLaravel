@@ -15,6 +15,7 @@ use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
 use Carbon\Carbon;
+use App\Helpers\FedexReportHelper; // added import
 
 class HospitalController extends Controller
 {
@@ -390,50 +391,8 @@ class HospitalController extends Controller
 
         $mappings = HospitalOutgoingFedexFieldMapping::all();
 
-        $headers = [
-            "Content-type" => "text/csv",
-            "Content-Disposition" => "attachment; filename={$fileName}",
-            "Pragma" => "no-cache",
-            "Cache-Control" => "must-revalidate, post-check=0, pre-check=0",
-            "Expires" => "0"
-        ];
-
-        $columns = $mappings->pluck('fedex_field')->toArray();
-
-        $callback = function() use ($hospitals, $mappings, $columns) {
-            $file = fopen('php://output', 'w');
-            fputcsv($file, $columns);
-        
-            foreach ($hospitals as $hospital) {
-                $row = [];
-        
-                foreach ($mappings as $map) {
-                    if (!empty($map->our_field)) {
-                        if ($map->our_field == "updated_at") {
-                            $row[] = $hospital->{$map->our_field} ? $hospital->{$map->our_field}->format('Ymd') : "";
-                        } else {
-                            // Pull value from the hospitals table dynamically
-                            $value = $hospital->{$map->our_field} ?? '';
-                            // Force Excel to treat as text
-                            if (preg_match('/^0\d+$/', $value)) {
-                                $row[] = "\t" . $value;  // Excel sees it as text
-                            } else {
-                                $row[] = $value;
-                            }
-                        }
-                    } elseif (!empty($map->common_value)) {
-                        $row[] = $map->common_value;
-                    } else {
-                        $row[] = '';
-                    }
-                }
-        
-                fputcsv($file, $row);
-            }
-        
-            fclose($file);
-        };
-        
-        return response()->stream($callback, 200, $headers);
+        // Use helper to stream the CSV (removes duplicated logic)
+        return FedexReportHelper::streamFedexCsv($hospitals, $mappings, $fileName);
     }
 }
+

@@ -17,6 +17,7 @@ use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
 use Carbon\Carbon;
+use App\Helpers\FedexReportHelper;
 
 class SchoolController extends Controller
 {
@@ -374,72 +375,37 @@ class SchoolController extends Controller
             ->leftJoin('school_box_size_matrices as sb', function ($join) {
                 $join->on(DB::raw('schools.envelope_quantity'), '>', DB::raw('sb.greater_than'))
                     ->on(DB::raw('schools.envelope_quantity'), '<=', DB::raw('sb.qty_of_env'));
-            })
-            // ->where('schools.update_status', 1)
-            ->orderBy('reference');
+            });
 
             if ($request->scope === 'since' && $request->has('since')) {
                 $sinceDate = Carbon::parse($request->since)->startOfDay();
                 $query->where('schools.updated_at', '>=', $sinceDate);
             }
 
-        $schools = $query->get();
-
         if ($type === 'outgoing') {
-            $mappings = SchoolOutgoingFedexFieldMapping::all();
+            $mappings = SchoolOutgoingFedexFieldMapping::query()
+                ->orderByRaw('`order` IS NULL')
+                ->orderBy('order')
+                ->orderBy('id')
+                ->get();
+        } else {
+            $mappings = SchoolReturnFedexFieldMapping::query()
+                ->orderByRaw('`order` IS NULL')
+                ->orderBy('order')
+                ->orderBy('id')
+                ->get();
         }
 
-        if ($type === 'return') {
-            $mappings = SchoolReturnFedexFieldMapping::all();            
-        }
+        // Default school export sort is by "Col C" (3rd mapping column), falling back to prior behavior.
+        $colC = $mappings->values()->get(2); // 0-based index => C
+        $sortField = $colC?->our_field ?: ($type === 'outgoing' ? 'organization_name' : 'reference');
+        $query->orderBy($sortField);
+
+        $schools = $query->get();
 
         $fileName = 'Fedex Formatted School Import '. now()->format('m-d-Y') .'.csv';
 
-        $headers = [
-            "Content-type" => "text/csv",
-            "Content-Disposition" => "attachment; filename={$fileName}",
-            "Pragma" => "no-cache",
-            "Cache-Control" => "must-revalidate, post-check=0, pre-check=0",
-            "Expires" => "0"
-        ];
-
-        $columns = $mappings->pluck('fedex_field')->toArray();
-
-        $callback = function() use ($schools, $mappings, $columns) {
-            $file = fopen('php://output', 'w');
-            fputcsv($file, $columns);
-        
-            foreach ($schools as $school) {
-                $row = [];
-        
-                foreach ($mappings as $map) {
-                    if (!empty($map->our_field)) {
-                        if ($map->our_field == "updated_at") {
-                            $row[] = $school->{$map->our_field} ? $school->{$map->our_field}->format('Ymd') : "";
-                        } else{
-                            // Pull value from the schools table dynamically
-                            $value = $school->{$map->our_field} ?? '';
-                            // Force Excel to treat as text
-                            if (preg_match('/^0\d+$/', $value)) {
-                                $row[] = "\t" . $value;  // Excel sees it as text
-                            } else {
-                                $row[] = $value;
-                            }
-                        }
-                    } elseif (!empty($map->common_value)) {
-                        $row[] = $map->common_value;
-                    } else {
-                        $row[] = '';
-                    }
-                }
-        
-                fputcsv($file, $row);
-            }
-        
-            fclose($file);
-        };
-
-        return response()->stream($callback, 200, $headers);
+        // Use helper to stream the CSV (removes duplicated logic)
+        return FedexReportHelper::streamFedexCsv($schools, $mappings, $fileName);
     }
-
 }
