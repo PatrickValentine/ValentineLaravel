@@ -83,6 +83,9 @@
                                     <th scope="col" style="min-width: 250px;">
                                         <i class="bi bi-envelope me-1"></i>Contact Info
                                     </th>
+                                    <th scope="col" style="min-width: 180px;">
+                                        <i class="bi bi-truck me-1"></i>Service Type
+                                    </th>
                                     <th scope="col" style="min-width: 250px;">
                                         <i class="bi bi-geo-alt me-1"></i>Address
                                     </th>
@@ -157,6 +160,9 @@
                                                     <span class="text-muted">{{ $school->phone }}</span>
                                                 </div>
                                             </div>
+                                        </td>
+                                        <td>
+                                            <span class="badge bg-outline-primary text-dark">{{ $school->service_type }}</span>
                                         </td>
                                         <td>
                                             <div class="d-flex flex-column">

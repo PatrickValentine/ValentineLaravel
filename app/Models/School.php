@@ -22,6 +22,7 @@ class School extends Model
         'county',
         'state',
         'zip',
+        'service_type',
         'phone',
         'standing_order',
         'public_notes',
