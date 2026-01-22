@@ -399,7 +399,7 @@
             </form>
         </div>
     </div>
-      
+
 
     {{-- REPORTS MODAL --}}
     <div class="modal fade" id="reportsModal" tabindex="-1" aria-labelledby="reportsModalLabel" aria-hidden="true">
@@ -476,10 +476,12 @@
                 <th>Phone</th> --}}
                                 <th style="min-width: 100px;">Street</th>
                                 <th style="min-width: 100px;">City</th>
+                                <th style="min-width: 100px;">County</th>
                                 <th style="min-width: 100px;">State</th>
                                 <th style="min-width: 100px;">ZIP</th>
                                 <th style="min-width: 100px;">Envelopes</th>
                                 <th style="min-width: 100px;">Cards</th>
+                                <th style="min-width: 100px;">Qty returned(by year)</th>
                                 <th style="min-width: 100px;">Box</th>
                                 <th style="min-width: 100px;">Empty Weight</th>
                                 <th style="min-width: 100px;">Full Weight</th>
@@ -588,6 +590,9 @@
                         data: 'city'
                     },
                     {
+                        data: 'county'
+                    },
+                    {
                         data: 'state'
                     },
                     {
@@ -598,6 +603,9 @@
                     },
                     {
                         data: 'instructions_cards'
+                    },
+                    {
+                        data: "qty_received_last_year"
                     },
                     {
                         data: null,

@@ -452,6 +452,7 @@
                 <th>Phone</th> --}}
                             <th style="min-width: 100px;">Street</th>
                             <th style="min-width: 100px;">City</th>
+                            <th style="min-width: 100px;">County</th>
                             <th style="min-width: 100px;">State</th>
                             <th style="min-width: 100px;">ZIP</th>
                             <th style="min-width: 100px;">Valentine Cards</th>
@@ -562,6 +563,9 @@ function initOrReloadTable() {
             },
             {
                 data: 'city'
+            },
+            {
+                data: 'county'
             },
             {
                 data: 'state'
