@@ -364,7 +364,7 @@ class SchoolController extends Controller
     {
         $query = School::select('schools.*', 
                 DB::raw('CONCAT("S", schools.state, LPAD(schools.id, 5, "0")) as reference'), 
-                DB::raw('CONCAT(schools.envelope_quantity, "/", schools.instructions_cards, "/", sb.box_style) as invoiceNumber'), 
+                DB::raw('CONCAT(schools.envelope_quantity, "/", COALESCE(schools.instructions_cards, 0), "/", sb.box_style) as invoiceNumber'),
                 'sb.id as matrix_id', 
                 'sb.box_style', 
                 'sb.length', 
