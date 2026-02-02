@@ -14,5 +14,6 @@ class SchoolReturnFedexFieldMapping extends Model
         'our_field',
         'common_value',
         'description',
+        'order',
     ];
 }

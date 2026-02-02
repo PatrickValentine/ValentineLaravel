@@ -56,8 +56,7 @@
                                 <div class="invalid-feedback">{{ $message }}</div>
                             @enderror
                         </div>
-
-                        <div class="col-md-6">
+                        <div class="col-md-3">
                             <label for="how_to_address" class="form-label fw-semibold">
                                 <i class="bi bi-person-badge me-1"></i>How to Address You
                             </label>
@@ -67,6 +66,19 @@
                             @error('how_to_address')
                                 <div class="invalid-feedback">{{ $message }}</div>
                             @enderror
+                        </div>
+                        <div class="col-md-3">
+                            <label for="service_type" class="form-label fw-semibold">
+                                <i class="bi bi-truck me-1"></i>Service Type
+                            </label>
+                            <select class="form-select @error('service_type') is-invalid @enderror"
+                                    id="service_type" name="service_type">
+                                <option value="FEDEX_GROUND" {{ old('service_type', $hospital->service_type) == 'FEDEX_GROUND' ? 'selected' : '' }}>FEDEX_GROUND</option>
+                                <option value="STANDARD_OVERNIGHT" {{ old('service_type', $hospital->service_type) == 'STANDARD_OVERNIGHT' ? 'selected' : '' }}>STANDARD_OVERNIGHT</option>
+                                <option value="FEDEX_2_DAY" {{ old('service_type', $hospital->service_type) == 'FEDEX_2_DAY' ? 'selected' : '' }}>FEDEX_2_DAY</option>
+                                <option value="FEDEX_EXPRESS_SAVER" {{ old('service_type', $hospital->service_type) == 'FEDEX_EXPRESS_SAVER' ? 'selected' : '' }}>FEDEX_EXPRESS_SAVER</option>
+                            </select>
+                            @error('service_type')<div class="invalid-feedback">{{ $message }}</div>@enderror
                         </div>
                     </div>
 

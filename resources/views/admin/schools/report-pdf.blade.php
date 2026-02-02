@@ -13,12 +13,12 @@
       white-space: normal;
     }
     th { background: #f5f5f5; }
-  
+
     /* Custom column widths */
     th.org, td.org { width: 20%; }
     th.contact, td.contact { width: 20%; }
     th.address, td.address { width: 20%; }
-  </style>  
+  </style>
 </head>
 <body>
   <h3>Schools Report</h3>
@@ -31,6 +31,7 @@
         <th class="address">Address</th>
         <th>Envelopes</th>
         <th>Cards</th>
+        <th>Qty returned (by year)</th>
         <th>Box</th>
         {{-- <th>Dim</th> --}}
         <th>Empty Weight</th>
@@ -61,6 +62,7 @@
           </td>
           <td>{{ $r->envelope_quantity }}</td>
           <td>{{ $r->instructions_cards }}</td>
+          <td>{{ $r->qty_received_last_year }}</td>
           <td>{{ $r->box_style }}<br>{{ $r->length }}x{{ $r->width }}x{{ $r->height }}</td>
           <td>{{ $r->empty_weight }}</td>
           <td>{{ $r->full_weight }}</td>

@@ -30,7 +30,7 @@
                     </div>
 
                     <div class="row mb-3">
-                        <div class="col-md-6">
+                        <div class="col-md-4">
                             <label for="contact_person_name" class="form-label fw-semibold">
                                 <i class="bi bi-person me-1 text-primary"></i> Contact Person Name
                             </label>
@@ -40,7 +40,7 @@
                                    maxlength="35" pattern="[A-Za-z0-9 .-]+">
                             @error('contact_person_name') <div class="invalid-feedback">{{ $message }}</div> @enderror
                         </div>
-                        <div class="col-md-6">
+                        <div class="col-md-4">
                             <label for="contact_title" class="form-label fw-semibold">
                                 <i class="bi bi-award me-1"></i> Title of Contact Person
                             </label>
@@ -51,6 +51,19 @@
                             @error('contact_title')
                                 <div class="invalid-feedback">{{ $message }}</div>
                             @enderror
+                        </div>
+                        <div class="col-md-4">
+                            <label for="service_type" class="form-label fw-semibold">
+                                <i class="bi bi-truck me-1"></i> Service Type
+                            </label>
+                            <select class="form-select @error('service_type') is-invalid @enderror"
+                                    id="service_type" name="service_type">
+                                <option value="FEDEX_GROUND" {{ old('service_type', $school->service_type) == 'FEDEX_GROUND' ? 'selected' : '' }}>FEDEX_GROUND</option>
+                                <option value="STANDARD_OVERNIGHT" {{ old('service_type', $school->service_type) == 'STANDARD_OVERNIGHT' ? 'selected' : '' }}>STANDARD_OVERNIGHT</option>
+                                <option value="FEDEX_2_DAY" {{ old('service_type', $school->service_type) == 'FEDEX_2_DAY' ? 'selected' : '' }}>FEDEX_2_DAY</option>
+                                <option value="FEDEX_EXPRESS_SAVER" {{ old('service_type', $school->service_type) == 'FEDEX_EXPRESS_SAVER' ? 'selected' : '' }}>FEDEX_EXPRESS_SAVER</option>
+                            </select>
+                            @error('service_type')<div class="invalid-feedback">{{ $message }}</div>@enderror
                         </div>                        
                     </div>
                     
