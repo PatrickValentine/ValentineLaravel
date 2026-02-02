@@ -21,17 +21,17 @@ class HospitalController extends Controller
     // Hospitals methods
     public function hospitalList()
     {
-        $hospitals = Hospital::select('hospitals.*', 
-                DB::raw('(hospitals.valentine_card_count + hospitals.extra_staff_cards) as totalHospRequested'), 
-                DB::raw('CONCAT("H", hospitals.state, LPAD(hospitals.id, 5, "0")) as reference'), 
-                DB::raw('CONCAT(hospitals.valentine_card_count, "/", hospitals.extra_staff_cards, "/", (hospitals.valentine_card_count + hospitals.extra_staff_cards), "/", hb.box_style) as invoiceNumber'), 
-                'hb.id as matrix_id', 
-                'hb.box_style', 
-                'hb.length', 
-                'hb.width', 
-                'hb.height', 
-                'hb.empty_weight', 
-                'hb.full_weight')
+        $hospitals = Hospital::select('hospitals.*',
+            DB::raw('(hospitals.valentine_card_count + hospitals.extra_staff_cards) as totalHospRequested'),
+            DB::raw('CONCAT("H", hospitals.state, LPAD(hospitals.id, 5, "0")) as reference'),
+            DB::raw('CONCAT(hospitals.valentine_card_count, "/", hospitals.extra_staff_cards, "/", (hospitals.valentine_card_count + hospitals.extra_staff_cards), "/", hb.box_style) as invoiceNumber'),
+            'hb.id as matrix_id',
+            'hb.box_style',
+            'hb.length',
+            'hb.width',
+            'hb.height',
+            'hb.empty_weight',
+            'hb.full_weight')
             ->leftJoin('hospital_box_size_matrices as hb', function ($join) {
                 $join->on(DB::raw('hospitals.valentine_card_count + hospitals.extra_staff_cards'), '>', DB::raw('hb.greater_than'))
                     ->on(DB::raw('hospitals.valentine_card_count + hospitals.extra_staff_cards'), '<=', DB::raw('hb.qty_of_env'));
@@ -50,17 +50,17 @@ class HospitalController extends Controller
     public function storeHospital(Request $request)
     {
         $validated = $request->validate([
-            'organization_name'     => 'required|string|max:255',
-            'organization_type'     => 'required|string|max:255',
-            'contact_person_name'   => 'required|string|max:255',
-            'email'                 => 'required|email|max:255|unique:hospitals,email',
-            'valentine_card_count'  => 'required|integer|min:0',
-            'street'                => 'required|string|max:255',
-            'city'                  => 'required|string|max:255',
-            'state'                 => 'required|string|max:20',
-            'zip'                   => 'required|string|max:20',
-            'phone'                 => 'required|string|max:255',
-            'standing_order'        => 'boolean',
+            'organization_name' => 'required|string|max:255',
+            'organization_type' => 'required|string|max:255',
+            'contact_person_name' => 'required|string|max:255',
+            'email' => 'required|email|max:255|unique:hospitals,email',
+            'valentine_card_count' => 'required|integer|min:0',
+            'street' => 'required|string|max:255',
+            'city' => 'required|string|max:255',
+            'state' => 'required|string|max:20',
+            'zip' => 'required|string|max:20',
+            'phone' => 'required|string|max:255',
+            'standing_order' => 'boolean',
             // 'prefilled_link' => 'nullable|string',
         ]);
 
@@ -108,15 +108,16 @@ class HospitalController extends Controller
             'updated_at' => 'nullable|date',
         ]);
 
-        // Always use validated data instead of $request->all()
-        if (!isset($validated['updated_at']) || empty($validated['updated_at'])) {
-            unset($validated['updated_at']);
-        }
-        else{
-            $validated['updated_at'] = Carbon::createFromFormat('Y-m-d\TH:i', $validated['updated_at']);
+        if (!empty($validated['updated_at'])) {
+            $formUpdatedAt = Carbon::parse($validated['updated_at']);
+            if ($formUpdatedAt->eq(Carbon::parse($hospital->updated_at)->setSeconds(0))) {
+                $validated['updated_at'] = Carbon::now();
+            } else {
+                $validated['updated_at'] = $formUpdatedAt;
+            }
         }
 
-        if($hospital->email != $request->email){
+        if ($hospital->email != $request->email) {
             $request->validate(['email' => 'required|email|max:255|unique:hospitals,email']);
         }
 
@@ -127,7 +128,7 @@ class HospitalController extends Controller
         $hospital->fill($allData);
 
         // Add prefilled link
-        // $hospital->prefilled_link = url('/hospital/' . $hospital->id . '/edit');        
+        // $hospital->prefilled_link = url('/hospital/' . $hospital->id . '/edit');
         $hospital->save();
 
         return redirect()->route('admin.hospitals')->with('success', 'Hospital updated successfully.');
@@ -155,20 +156,20 @@ class HospitalController extends Controller
         while (($row = fgetcsv($file)) !== false) {
             // Adjust indices to match your CSV format
             $hospitalData = [
-                'organization_name'     => $row[0] ?? null,
-                'valentine_card_count'  => !empty($row[1]) ? intval($row[1]) : 0,
-                'extra_staff_cards'     => !empty($row[2]) ? intval($row[2]) : 0,
-                'street'                => $row[3] ?? null,
-                'city'                  => $row[4] ?? null,
-                'state'                 => strtoupper($row[5] ?? ''),
-                'zip'                   => $row[6] ?? null,
-                'phone'                 => $row[7] ?? null,
-                'contact_person_name'   => $row[8] ?? null,
-                'how_to_address'        => $row[9] ?? null,
-                'email'                 => $row[10] ?? null,                
-                'public_notes'          => $row[11] ?? null,
-                'organization_type'     => $row[12] ?? null,
-                'contact_title'         => $row[13] ?? null,
+                'organization_name' => $row[0] ?? null,
+                'valentine_card_count' => !empty($row[1]) ? intval($row[1]) : 0,
+                'extra_staff_cards' => !empty($row[2]) ? intval($row[2]) : 0,
+                'street' => $row[3] ?? null,
+                'city' => $row[4] ?? null,
+                'state' => strtoupper($row[5] ?? ''),
+                'zip' => $row[6] ?? null,
+                'phone' => $row[7] ?? null,
+                'contact_person_name' => $row[8] ?? null,
+                'how_to_address' => $row[9] ?? null,
+                'email' => $row[10] ?? null,
+                'public_notes' => $row[11] ?? null,
+                'organization_type' => $row[12] ?? null,
+                'contact_title' => $row[13] ?? null,
             ];
 
             if (!empty($hospitalData['email'])) {
@@ -198,19 +199,19 @@ class HospitalController extends Controller
     // {
     //     try {
     //         $spreadsheetId = env('GOOGLE_SHEETS_HOSPITAL_ID', '1NJuNcffKR2KeJLkFSsCyICdUhKXCwNV8');
-            
+
     //         // Try to access the sheet as a public CSV export
     //         $csvUrl = "https://docs.google.com/spreadsheets/d/{$spreadsheetId}/export?format=csv&gid=616306137";
-            
+
     //         $response = Http::get($csvUrl);
-            
+
     //         if (!$response->successful()) {
     //             throw new \Exception('Failed to access Google Sheet. Make sure it is shared publicly or with the service account.');
     //         }
-            
+
     //         $csvData = $response->body();
     //         $rows = array_map('str_getcsv', explode("\n", $csvData));
-            
+
     //         // Remove empty rows
     //         $rows = array_filter($rows, function($row) {
     //             return !empty(array_filter($row));
@@ -227,7 +228,7 @@ class HospitalController extends Controller
     //         for ($i = 0; $i < 2; $i++) {
     //             array_shift($rows);
     //         }
-            
+
     //         // Now $rows contains only data rows (starting from third row)
     //         $imported = 0;
 
@@ -267,7 +268,7 @@ class HospitalController extends Controller
 
     //                 $hospital->prefilled_link = url('/hospital/' . $hospital->id . '/edit');
     //                 $hospital->save();
-                
+
     //                 $imported++;
     //             }
     //         }
@@ -281,17 +282,17 @@ class HospitalController extends Controller
 
     public function exportSendgridCsv(Request $request)
     {
-        $query = Hospital::select('hospitals.*', 
-                DB::raw('(hospitals.valentine_card_count + hospitals.extra_staff_cards) as totalHospRequested'), 
-                DB::raw('CONCAT("H", hospitals.state, LPAD(hospitals.id, 5, "0")) as reference'), 
-                DB::raw('CONCAT(hospitals.valentine_card_count, "/", hospitals.extra_staff_cards, "/", (hospitals.valentine_card_count + hospitals.extra_staff_cards), "/", hb.box_style) as invoiceNumber'), 
-                'hb.id as matrix_id', 
-                'hb.box_style', 
-                'hb.length', 
-                'hb.width', 
-                'hb.height', 
-                'hb.empty_weight', 
-                'hb.full_weight')
+        $query = Hospital::select('hospitals.*',
+            DB::raw('(hospitals.valentine_card_count + hospitals.extra_staff_cards) as totalHospRequested'),
+            DB::raw('CONCAT("H", hospitals.state, LPAD(hospitals.id, 5, "0")) as reference'),
+            DB::raw('CONCAT(hospitals.valentine_card_count, "/", hospitals.extra_staff_cards, "/", (hospitals.valentine_card_count + hospitals.extra_staff_cards), "/", hb.box_style) as invoiceNumber'),
+            'hb.id as matrix_id',
+            'hb.box_style',
+            'hb.length',
+            'hb.width',
+            'hb.height',
+            'hb.empty_weight',
+            'hb.full_weight')
             ->leftJoin('hospital_box_size_matrices as hb', function ($join) {
                 $join->on(DB::raw('hospitals.valentine_card_count + hospitals.extra_staff_cards'), '>', DB::raw('hb.greater_than'))
                     ->on(DB::raw('hospitals.valentine_card_count + hospitals.extra_staff_cards'), '<=', DB::raw('hb.qty_of_env'));
@@ -320,13 +321,13 @@ class HospitalController extends Controller
 
         $columns = $mappings->pluck('sendgrid_field')->toArray();
 
-        $callback = function() use ($hospitals, $mappings, $columns) {
+        $callback = function () use ($hospitals, $mappings, $columns) {
             $file = fopen('php://output', 'w');
             fputcsv($file, $columns);
-        
+
             foreach ($hospitals as $hospital) {
                 $row = [];
-        
+
                 foreach ($mappings as $map) {
                     if (!empty($map->our_field)) {
                         if ($map->our_field == "standing_order") {
@@ -348,10 +349,10 @@ class HospitalController extends Controller
                         $row[] = '';
                     }
                 }
-        
+
                 fputcsv($file, $row);
             }
-        
+
             fclose($file);
         };
 
@@ -360,18 +361,18 @@ class HospitalController extends Controller
 
     public function exportFedexCsv(Request $request)
     {
-        $fileName = 'Fedex Formatted hospitals Import '. now()->format('m-d-Y') .'.csv';
-        $query = Hospital::select('hospitals.*', 
-                DB::raw('(hospitals.valentine_card_count + hospitals.extra_staff_cards) as totalHospRequested'), 
-                DB::raw('CONCAT("H", hospitals.state, LPAD(hospitals.id, 5, "0")) as reference'), 
-                DB::raw('CONCAT(hospitals.valentine_card_count, "/", hospitals.extra_staff_cards, "/", (hospitals.valentine_card_count + hospitals.extra_staff_cards), "/", hb.box_style) as invoiceNumber'), 
-                'hb.id as matrix_id', 
-                'hb.box_style', 
-                'hb.length', 
-                'hb.width', 
-                'hb.height', 
-                'hb.empty_weight', 
-                'hb.full_weight')
+        $fileName = 'Fedex Formatted hospitals Import ' . now()->format('m-d-Y') . '.csv';
+        $query = Hospital::select('hospitals.*',
+            DB::raw('(hospitals.valentine_card_count + hospitals.extra_staff_cards) as totalHospRequested'),
+            DB::raw('CONCAT("H", hospitals.state, LPAD(hospitals.id, 5, "0")) as reference'),
+            DB::raw('CONCAT(hospitals.valentine_card_count, "/", hospitals.extra_staff_cards, "/", (hospitals.valentine_card_count + hospitals.extra_staff_cards), "/", hb.box_style) as invoiceNumber'),
+            'hb.id as matrix_id',
+            'hb.box_style',
+            'hb.length',
+            'hb.width',
+            'hb.height',
+            'hb.empty_weight',
+            'hb.full_weight')
             ->leftJoin('hospital_box_size_matrices as hb', function ($join) {
                 $join->on(DB::raw('hospitals.valentine_card_count + hospitals.extra_staff_cards'), '>', DB::raw('hb.greater_than'))
                     ->on(DB::raw('hospitals.valentine_card_count + hospitals.extra_staff_cards'), '<=', DB::raw('hb.qty_of_env'));
@@ -398,13 +399,13 @@ class HospitalController extends Controller
 
         $columns = $mappings->pluck('fedex_field')->toArray();
 
-        $callback = function() use ($hospitals, $mappings, $columns) {
+        $callback = function () use ($hospitals, $mappings, $columns) {
             $file = fopen('php://output', 'w');
             fputcsv($file, $columns);
-        
+
             foreach ($hospitals as $hospital) {
                 $row = [];
-        
+
                 foreach ($mappings as $map) {
                     if (!empty($map->our_field)) {
                         if ($map->our_field == "updated_at") {
@@ -425,13 +426,13 @@ class HospitalController extends Controller
                         $row[] = '';
                     }
                 }
-        
+
                 fputcsv($file, $row);
             }
-        
+
             fclose($file);
         };
-        
+
         return response()->stream($callback, 200, $headers);
     }
 }
