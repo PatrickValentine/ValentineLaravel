@@ -22,10 +22,19 @@ class HospitalController extends Controller
     // Hospitals methods
     public function hospitalList()
     {
+        $totalExpr = 'hospitals.valentine_card_count + COALESCE(hospitals.extra_staff_cards, 0)';
+
+        $matrixIdScalarSubquery = "(SELECT hbm.id
+            FROM hospital_box_size_matrices hbm
+            WHERE {$totalExpr} >= hbm.greater_than
+              AND {$totalExpr} <= hbm.qty_of_env
+            ORDER BY hbm.qty_of_env ASC
+            LIMIT 1)";
+
         $hospitals = Hospital::select('hospitals.*',
-            DB::raw('(hospitals.valentine_card_count + hospitals.extra_staff_cards) as totalHospRequested'),
+            DB::raw("({$totalExpr}) as totalHospRequested"),
             DB::raw('CONCAT("H", hospitals.state, LPAD(hospitals.id, 5, "0")) as reference'),
-            DB::raw('CONCAT(hospitals.valentine_card_count, "/", hospitals.extra_staff_cards, "/", (hospitals.valentine_card_count + hospitals.extra_staff_cards), "/", hb.box_style) as invoiceNumber'),
+            DB::raw("CONCAT(hospitals.valentine_card_count, '/', COALESCE(hospitals.extra_staff_cards, 0), '/', ({$totalExpr}), '/', COALESCE(hb.box_style, '')) as invoiceNumber"),
             'hb.id as matrix_id',
             'hb.box_style',
             'hb.length',
@@ -33,10 +42,7 @@ class HospitalController extends Controller
             'hb.height',
             'hb.empty_weight',
             'hb.full_weight')
-            ->leftJoin('hospital_box_size_matrices as hb', function ($join) {
-                $join->on(DB::raw('hospitals.valentine_card_count + hospitals.extra_staff_cards'), '>', DB::raw('hb.greater_than'))
-                    ->on(DB::raw('hospitals.valentine_card_count + hospitals.extra_staff_cards'), '<=', DB::raw('hb.qty_of_env'));
-            })
+            ->leftJoin('hospital_box_size_matrices as hb', 'hb.id', '=', DB::raw($matrixIdScalarSubquery))
             ->orderBy('reference')
             ->get();
 
@@ -285,10 +291,19 @@ class HospitalController extends Controller
 
     public function exportSendgridCsv(Request $request)
     {
+        $totalExpr = 'hospitals.valentine_card_count + COALESCE(hospitals.extra_staff_cards, 0)';
+
+        $matrixIdScalarSubquery = "(SELECT hbm.id
+            FROM hospital_box_size_matrices hbm
+            WHERE {$totalExpr} >= hbm.greater_than
+              AND {$totalExpr} <= hbm.qty_of_env
+            ORDER BY hbm.qty_of_env ASC
+            LIMIT 1)";
+
         $query = Hospital::select('hospitals.*',
-            DB::raw('(hospitals.valentine_card_count + hospitals.extra_staff_cards) as totalHospRequested'),
+            DB::raw("({$totalExpr}) as totalHospRequested"),
             DB::raw('CONCAT("H", hospitals.state, LPAD(hospitals.id, 5, "0")) as reference'),
-            DB::raw('CONCAT(hospitals.valentine_card_count, "/", hospitals.extra_staff_cards, "/", (hospitals.valentine_card_count + hospitals.extra_staff_cards), "/", hb.box_style) as invoiceNumber'),
+            DB::raw("CONCAT(hospitals.valentine_card_count, '/', COALESCE(hospitals.extra_staff_cards, 0), '/', ({$totalExpr}), '/', COALESCE(hb.box_style, '')) as invoiceNumber"),
             'hb.id as matrix_id',
             'hb.box_style',
             'hb.length',
@@ -296,11 +311,7 @@ class HospitalController extends Controller
             'hb.height',
             'hb.empty_weight',
             'hb.full_weight')
-            ->leftJoin('hospital_box_size_matrices as hb', function ($join) {
-                $join->on(DB::raw('hospitals.valentine_card_count + hospitals.extra_staff_cards'), '>', DB::raw('hb.greater_than'))
-                    ->on(DB::raw('hospitals.valentine_card_count + hospitals.extra_staff_cards'), '<=', DB::raw('hb.qty_of_env'));
-            })
-            // ->where('hospitals.update_status', 1)
+            ->leftJoin('hospital_box_size_matrices as hb', 'hb.id', '=', DB::raw($matrixIdScalarSubquery))
             ->orderBy('reference');
 
         if ($request->scope === 'since' && $request->has('since')) {
@@ -365,10 +376,20 @@ class HospitalController extends Controller
     public function exportFedexCsv(Request $request)
     {
         $fileName = 'Fedex Formatted hospitals Import ' . now()->format('m-d-Y') . '.csv';
+
+        $totalExpr = 'hospitals.valentine_card_count + COALESCE(hospitals.extra_staff_cards, 0)';
+
+        $matrixIdScalarSubquery = "(SELECT hbm.id
+            FROM hospital_box_size_matrices hbm
+            WHERE {$totalExpr} >= hbm.greater_than
+              AND {$totalExpr} <= hbm.qty_of_env
+            ORDER BY hbm.qty_of_env ASC
+            LIMIT 1)";
+
         $query = Hospital::select('hospitals.*',
-            DB::raw('(hospitals.valentine_card_count + hospitals.extra_staff_cards) as totalHospRequested'),
+            DB::raw("({$totalExpr}) as totalHospRequested"),
             DB::raw('CONCAT("H", hospitals.state, LPAD(hospitals.id, 5, "0")) as reference'),
-            DB::raw('CONCAT(hospitals.valentine_card_count, "/", hospitals.extra_staff_cards, "/", (hospitals.valentine_card_count + hospitals.extra_staff_cards), "/", hb.box_style) as invoiceNumber'),
+            DB::raw("CONCAT(hospitals.valentine_card_count, '/', COALESCE(hospitals.extra_staff_cards, 0), '/', ({$totalExpr}), '/', COALESCE(hb.box_style, '')) as invoiceNumber"),
             'hb.id as matrix_id',
             'hb.box_style',
             'hb.length',
@@ -376,11 +397,7 @@ class HospitalController extends Controller
             'hb.height',
             'hb.empty_weight',
             'hb.full_weight')
-            ->leftJoin('hospital_box_size_matrices as hb', function ($join) {
-                $join->on(DB::raw('hospitals.valentine_card_count + hospitals.extra_staff_cards'), '>', DB::raw('hb.greater_than'))
-                    ->on(DB::raw('hospitals.valentine_card_count + hospitals.extra_staff_cards'), '<=', DB::raw('hb.qty_of_env'));
-            })
-            // ->where('hospitals.update_status', 1)
+            ->leftJoin('hospital_box_size_matrices as hb', 'hb.id', '=', DB::raw($matrixIdScalarSubquery))
             ->orderBy('reference');
 
         if ($request->scope === 'since' && $request->has('since')) {
