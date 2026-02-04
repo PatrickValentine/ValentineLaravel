@@ -31,7 +31,7 @@
                             @enderror
                         </div>
 
-                        <div class="col-md-6">
+                        <div class="col-md-3">
                             <label for="organization_type" class="form-label fw-semibold">
                                 <i class="bi bi-building me-1"></i>Organization Type
                             </label>
@@ -41,6 +41,17 @@
                             @error('organization_type')
                                 <div class="invalid-feedback">{{ $message }}</div>
                             @enderror
+                        </div>
+
+                        <!-- Read-only Reference ID -->
+                        <div class="col-md-3">
+                            <label class="form-label fw-semibold">
+                                <i class="bi bi-hash me-1"></i>Reference
+                            </label>
+                            <input type="text"
+                                   class="form-control"
+                                   value="{{ $reference ?? ('H' . $hospital->state . str_pad($hospital->id, 5, '0', STR_PAD_LEFT)) }}"
+                                   readonly>
                         </div>
                     </div>
 

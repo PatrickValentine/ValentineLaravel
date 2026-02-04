@@ -91,7 +91,11 @@ class SchoolController extends Controller
     public function editSchool(School $school)
     {
         $volunteers = Volunteer::all();
-        return view('admin.schools.edit', compact('school', 'volunteers'));
+
+        // Build same reference format used elsewhere: S + state + 5‑digit id
+        $reference = 'S' . $school->state . str_pad($school->id, 5, '0', STR_PAD_LEFT);
+
+        return view('admin.schools.edit', compact('school', 'volunteers', 'reference'));
     }
 
     public function updateSchool(Request $request, School $school)
@@ -409,3 +413,4 @@ class SchoolController extends Controller
         return FedexReportHelper::streamFedexCsv($schools, $mappings, $fileName);
     }
 }
+

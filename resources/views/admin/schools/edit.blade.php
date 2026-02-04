@@ -17,7 +17,7 @@
                 </div>
                 <div class="card-body">
                     <div class="row mb-3">
-                        <div class="col-md-12">
+                        <div class="col-md-8">
                             <label for="organization_name" class="form-label fw-semibold">
                                 <i class="bi bi-building me-1 text-danger"></i> Organization Name
                             </label>
@@ -26,6 +26,17 @@
                                    value="{{ old('organization_name', $school->organization_name) }}"
                                    maxlength="30" pattern="[A-Za-z0-9 .-]+">
                             @error('organization_name') <div class="invalid-feedback">{{ $message }}</div> @enderror
+                        </div>
+
+                        <!-- Read-only Reference ID -->
+                        <div class="col-md-4">
+                            <label class="form-label fw-semibold">
+                                <i class="bi bi-hash me-1"></i>Reference
+                            </label>
+                            <input type="text"
+                                   class="form-control"
+                                   value="{{ $reference ?? ('S' . $school->state . str_pad($school->id, 5, '0', STR_PAD_LEFT)) }}"
+                                   readonly>
                         </div>
                     </div>
 

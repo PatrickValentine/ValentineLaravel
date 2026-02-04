@@ -96,7 +96,10 @@ class HospitalController extends Controller
 
     public function editHospital(Hospital $hospital)
     {
-        return view('admin.hospitals.edit', compact('hospital'));
+        // Build same reference format used elsewhere: H + state + 5‑digit id
+        $reference = 'H' . $hospital->state . str_pad($hospital->id, 5, '0', STR_PAD_LEFT);
+
+        return view('admin.hospitals.edit', compact('hospital', 'reference'));
     }
 
     public function updateHospital(Request $request, Hospital $hospital)
